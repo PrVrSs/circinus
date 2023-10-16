@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "circinus"
+version = "0.0.1"
+description = "LLM-powered generation-based fuzzer."
+authors = ["PrVrSs <resh.sersh@gmail.com>"]
+license = "MIT"
+
+readme = "README.md"
+repository = "https://github.com/PrVrSs/circinus"
+homepage = "https://github.com/PrVrSs/circinus"
+
+keywords = [
+  "LLM",
+  "ChatGPT",
+  "fuzzer",
+  "fuzzing"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dynaconf = "^3.2.3"
+openai = "^0.28.1"
+click = "^8.1.7"
+attrs = "^23.1.0"
+loguru = "^0.7.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+pylint = "^3.0.1"
+mypy = "^1.6.0"
+pytest-cov = "^4.1.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
