@@ -1,6 +1,6 @@
 # Circinus
 
-[![Build Status](https://github.com/PrVrSs/circinus/workflows/test/badge.svg?branch=main&event=push)](https://github.com/PrVrSs/circinus/actions?query=workflow%3Atest)
+[![Build Status](https://github.com/PrVrSs/circinus/workflows/test/badge.svg)](https://github.com/PrVrSs/circinus/actions?query=workflow%3Atest)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PrVrSs/circinus/blob/master/LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue)](https://www.python.org/)
 
