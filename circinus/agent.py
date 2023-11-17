@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from .fuzzer import UserInput, candidate_prompt, fuzzing_loop
-from .llm import GPT
+from circinus.fuzzer import UserInput, candidate_prompt, fuzzing_loop
+from circinus.llm import GPT
 
 
 class Agent:
