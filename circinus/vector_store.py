@@ -1,77 +1,61 @@
-import tempfile
-import uuid
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import chromadb
-from chromadb.api.types import QueryResult
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
-from circinus.logger import logger
-
-
-def tmp_db() -> Path:
-    return Path(tempfile.gettempdir()) / 'circinus' / datetime.now().strftime('%Y%m%d-%H%M%S') / 'chromadb.db'
+from attrs import define
+from chromadb.config import Settings
+from llama_index import VectorStoreIndex
+from llama_index.indices.vector_store import VectorIndexRetriever
+from llama_index.vector_stores import ChromaVectorStore
+from llama_index.vector_stores.types import VectorStore as _VectorStore
 
 
-def split_text_to_chunks(text: str) -> list[str]:
-    # TODO
-    return [text]
+BASE = Path(__file__).parent
+
+
+@define
+class ContextFilter:
+    docs_ids: list[str] | None
+
+
+def _chromadb_doc_id_metadata_filter(context_filter: ContextFilter | None) -> dict | None:
+    if context_filter is None or context_filter.docs_ids is None:
+        return {}
+    if len(context_filter.docs_ids) < 1:
+        return {'doc_id': '-'}
+
+    doc_filter_items = []
+    if len(context_filter.docs_ids) > 1:
+        doc_filter = {'$or': doc_filter_items}
+        for doc_id in context_filter.docs_ids:
+            doc_filter_items.append({'doc_id': doc_id})
+    else:
+        doc_filter = {'doc_id': context_filter.docs_ids[0]}
+
+    return doc_filter
 
 
 class VectorStore:
+    vector_store: _VectorStore
 
-    def __init__(self, db_path: Optional[str] = None):
-        self._client = chromadb.PersistentClient(path=db_path or str(tmp_db()))
-
-    def add_text(
-        self,
-        text: str,
-        name: str = 'code-snippets',
-        model_name: str = 'all-MiniLM-L6-v2',
-        batch: int = 10000,
-    ) -> None:
-        collection = self._client.get_or_create_collection(
-            name=name,
-            embedding_function=SentenceTransformerEmbeddingFunction(model_name=model_name),
-            metadata={"style": "style1"},
+    def __init__(self) -> None:
+        chroma_settings = Settings(anonymized_telemetry=False)
+        chroma_client = chromadb.PersistentClient(
+            path=str((BASE / 'chroma_db').absolute()),
+            settings=chroma_settings,
         )
+        chroma_collection = chroma_client.get_or_create_collection('make_this_parameterizable_per_api_call')
+        self.vector_store = ChromaVectorStore(chroma_client=chroma_client, chroma_collection=chroma_collection)
 
-        chunks = split_text_to_chunks(text)
-        for i in range(0, len(chunks), min(batch, len(chunks))):
-            end = i + min(batch, len(chunks) - i)
-            collection.upsert(
-                documents=chunks[i:end],
-                ids=[
-                    uuid.uuid4().hex
-                    for _ in range(i, end)
-                ],
-            )
-
-    def query(
-        self,
-        query: list[str],
-        model_name: str = 'all-MiniLM-L6-v2',
-        name: str = 'code-snippets',
-        search_string: str = '',
-        n_results: int = 5,
-    ) -> QueryResult:
-        collection = self._client.get_collection(name=name)
-
-        return collection.query(
-            query_embeddings=SentenceTransformerEmbeddingFunction(model_name=model_name)(query),
-            n_results=n_results,
-            where_document={'$contains': search_string} if search_string else None,
+    @staticmethod
+    def get_retriever(
+        index: VectorStoreIndex,
+        context_filter: ContextFilter | None = None,
+        similarity_top_k: int = 2,
+    ) -> VectorIndexRetriever:
+        return VectorIndexRetriever(
+            index=index,
+            similarity_top_k=similarity_top_k,
+            vector_store_kwargs={
+                'where': _chromadb_doc_id_metadata_filter(context_filter)
+            },
         )
-
-
-def main():
-    store = VectorStore()
-    store.add_text(text='qwerty asd ggg gg')
-    store.add_text(text='asd ggg gg qwerty')
-    print(store.query(query=['qwerty']))
-
-
-if __name__ == '__main__':
-    main()
