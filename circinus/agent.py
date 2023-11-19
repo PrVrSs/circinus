@@ -32,7 +32,7 @@ class Source:
         return '\n'.join([
             f'{self.file=}',
             f'{self.page=}',
-            f'{self.text=}'
+            f'{self.text=}',
         ])
 
 
