@@ -19,6 +19,12 @@ from llama_index.schema import NodeWithScore
 from llama_index.storage.docstore import BaseDocumentStore
 from llama_index.storage.index_store.types import BaseIndexStore
 
+from circinus.components import (
+    doc_store_component,
+    embedding_component,
+    index_store_component,
+    llm_component,
+)
 from circinus.vector_store import ContextFilter, VectorStore
 
 
@@ -216,32 +222,11 @@ class KnowledgeBase:
         return retrieved_nodes
 
 
-def main():
-    from circinus.components import (
-        doc_store_component,
-        embedding_component,
-        index_store_component,
-        llm_component,
-    )
-    from circinus.settings import load_config
-
-    config = load_config('config.toml')
-    knowledge_base = KnowledgeBase(
+def init_knowledge_base(config) -> KnowledgeBase:
+    return KnowledgeBase(
         llm=llm_component(config=config),
         vector_store_component=VectorStore(),
         embedding=embedding_component(config=config),
         document_store=doc_store_component(),
         index_store=index_store_component(),
     )
-
-    docs = knowledge_base.add(
-        file_name='blob_documentation.txt',
-        file_data=(Path(__file__).parent / 'blob_documentation.txt').read_text(encoding='utf-8')
-    )
-
-    print(docs)
-    print(knowledge_base.retrieve('Blob.prototype.size'))
-
-
-if __name__ == '__main__':
-    main()
