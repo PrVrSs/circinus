@@ -23,9 +23,7 @@ class GPT:
     system_prompt = 'You are a helpful assistant.'
 
     def __init__(self):
-        openai.api_key = settings.openai_api_key
-
-        self.llm = openai
+        self.llm = openai.OpenAI(api_key=settings.openai_api_key)
         self.model = settings.openai_api_model
         self.auto_max_tokens = False
         self.temperature = 0
@@ -45,14 +43,14 @@ class GPT:
 
         return self.get_choice_text(rsp)
 
-    def get_choice_text(self, rsp: dict) -> str:
-        return rsp.get('choices')[0]['message']['content']
+    def get_choice_text(self, rsp) -> str:
+        return rsp.choices[0].message.content
 
-    def completion(self, messages: list[dict]) -> dict:
+    def completion(self, messages: list[dict]):
         return self._chat_completion(messages)
 
-    def _chat_completion(self, messages: list[dict]) -> dict:
-        return self.llm.ChatCompletion.create(**self._cons_kwargs(messages))
+    def _chat_completion(self, messages: list[dict]):
+        return self.llm.chat.completions.create(**self._cons_kwargs(messages))
 
     def _cons_kwargs(self, messages: list[dict]) -> dict:
         return {

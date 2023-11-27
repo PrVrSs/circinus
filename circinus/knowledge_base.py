@@ -126,18 +126,19 @@ class KnowledgeBase:
             node_parser=SentenceWindowNodeParser.from_defaults(),
         )
 
-    def add(self, file_name: str, file_data: AnyStr | Path) -> list[DocumentDTO]:
+    def add(self, file_name: str, file_data: AnyStr | Path, type_: str) -> list[DocumentDTO]:
         documents = to_documents(extension=Path(file_name).suffix, data=file_data)
         for document in documents:
             document.metadata['file_name'] = file_name
 
-        return self._save_docs(documents)
+        return self._save_docs(documents, type_)
 
-    def _save_docs(self, documents: list[Document]) -> list[DocumentDTO]:
+    def _save_docs(self, documents: list[Document], type_: str) -> list[DocumentDTO]:
         for document in documents:
             document.metadata['doc_id'] = document.doc_id
-            document.excluded_embed_metadata_keys = ['doc_id']
-            document.excluded_llm_metadata_keys = ['file_name', 'doc_id', 'page_label']
+            document.metadata['doc_type'] = type_
+            document.excluded_embed_metadata_keys = ['doc_id', 'doc_type']
+            document.excluded_llm_metadata_keys = ['file_name', 'doc_id', 'page_label', 'doc_type']
 
         try:
             index = load_index_from_storage(

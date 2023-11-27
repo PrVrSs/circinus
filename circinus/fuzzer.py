@@ -11,9 +11,9 @@ from .utils import extract_code
 
 circinus_random = random.Random(time.process_time())
 
+
 SUMMARIZE_PROMPT = """
 Please summarize the above information in a concise manner to describe the usage and functionality of the target."""
-GENERATION_PROMPT = 'Please create a program which uses Blob class according to the following description'
 GENERATION_MUTATE_PROMPT = 'Program:\n {generation}.\n Please create a mutated program that modifiers this program.'
 GENERATION_SEMANTIC_EQUIP = 'Program:\n {generation}.\n Please create a semantically equivalent program to this program'
 
@@ -41,15 +41,15 @@ def candidate_prompt(llm: GPT, user_input: UserInput, num_samples: int = 3) -> l
     return list(chain([greedy_prompt], diverse_prompt))
 
 
-def fuzzing_loop(llm: GPT, prompt: str) -> list[str]:
+def fuzzing_loop(llm: GPT, prompt: str, generation_prompt) -> list[str]:
     result = []
     llm.temperature = 1
 
-    program = llm.ask('\n'.join([GENERATION_PROMPT, prompt]))
+    program = llm.ask('\n'.join([generation_prompt, prompt]))
     result.append(code_snippet := extract_code(program))
 
     for _ in range(2):
-        instruction = circinus_random.choice([GENERATION_MUTATE_PROMPT, GENERATION_SEMANTIC_EQUIP])
+        instruction = circinus_random.choice([generation_prompt, GENERATION_SEMANTIC_EQUIP])
         program = llm.ask(instruction.format(generation=code_snippet))
         result.append(code_snippet := extract_code(program))
 
