@@ -16,7 +16,7 @@ Base = (Path(__file__).parent.parent / 'data').resolve(strict=True)
 
 
 def _openai_llm(config):
-    return OpenAI(api_key=config.openai_settings)
+    return OpenAI(api_key=config.openai_api_key)
 
 
 def _mock_llm() -> LLM:
@@ -24,7 +24,7 @@ def _mock_llm() -> LLM:
 
 
 def _openai_embedding(config):
-    return OpenAIEmbedding(api_key=config.openai_settings)
+    return OpenAIEmbedding(api_key=config.openai_api_key)
 
 
 def _mock_embedding():

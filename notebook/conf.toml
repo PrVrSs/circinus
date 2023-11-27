@@ -1,3 +1,4 @@
-OPENAI_API_KEY=''
-OPENAI_API_MODEL='gpt-3.5-turbo'
-MAX_TOKENS=2048
+openai_api_key=''
+openai_api_model='gpt-3.5-turbo'
+max_tokens=2048
+mode='openai'
