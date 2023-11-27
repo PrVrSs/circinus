@@ -1,7 +1,6 @@
 import random
 import time
 from itertools import chain
-from string import Template
 from typing import Optional
 
 from attrs import define
